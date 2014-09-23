@@ -6,16 +6,16 @@
 #include <strsafe.h>
 #include <stdio.h>
 
-#define SERVICE_NAME "Discreet Headphones Service"
+#define SERVICE_NAME _T("Discreet Headphones Service")
 
 class DPhonesSCM
 {
 	private:
 		static DPhonesSCM*		m_ServiceInstance;
 
-		SERVICE_STATUS			m_ServiceStatus;		// Contains information for a service. (see. constructor)
-		SERVICE_STATUS_HANDLE	m_ServiceHandle;
-		HANDLE					m_ServiceStopEvent;
+		SERVICE_STATUS			m_ServiceStatus;		
+		SERVICE_STATUS_HANDLE	m_ServiceStatusHandle;		
+		HANDLE					m_ServiceStopEvent;		
 
 	private:
 		DPhonesSCM(void);
