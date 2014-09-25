@@ -26,7 +26,7 @@ class DPhonesSCM
 		static DPhonesSCM*		getInstance(void);
 
 		static VOID WINAPI		ServiceMain(DWORD argc, LPTSTR *argv);
-		VOID WINAPI				ServiceCtrlHandler(DWORD argc);
+		VOID WINAPI				ServiceCtrlHandler(DWORD ctrlCode);
 		DWORD WINAPI			ServiceWorkThread(LPVOID lpParam);
 };	
 
