@@ -45,7 +45,7 @@ DPhonesSCM*	DPhonesSCM::getInstance(void)
 	if(m_ServiceInstance == nullptr)
 		m_ServiceInstance = new DPhonesSCM();
 
-	else return m_ServiceInstance;
+		return m_ServiceInstance;
 }
 //------------------------------------------------
 VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
@@ -55,13 +55,13 @@ VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	DWORD Status = E_FAIL;
 
 	// Registers the service control handler with the SCM.
-	m_ServiceInstance->m_ServiceStatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, m_ServiceInstance->ServiceCtrlHandler);
+	getInstance()->m_ServiceStatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, [](DWORD ctrlCode){ return getInstance()->ServiceCtrlHandler(ctrlCode); });
 
-	if(m_ServiceInstance->m_ServiceStatusHandle == NULL)
+	if(getInstance()->m_ServiceStatusHandle == NULL)
 		return;
 
 	// Starts the service controller.
-	if(SetServiceStatus(m_ServiceInstance->m_ServiceStatusHandle, &m_ServiceInstance->m_ServiceStatus) == FALSE)
+	if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
 	{
 		OutputDebugString(_T("Discreet Headphones Service: ServiceMain: SetService has returned an error"));
 	}
@@ -71,22 +71,22 @@ VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	 */
 
 	// Create a service stop event to wait on later
-	m_ServiceInstance->m_ServiceStopEvent = CreateEvent(NULL,	// lpEventAttributes: The handle cannot be inherited by child processes.
+	getInstance()->m_ServiceStopEvent = CreateEvent(NULL,	// lpEventAttributes: The handle cannot be inherited by child processes.
 									FALSE,	// bManualReset: Creates a manual-reset event object.  ResetEvent sets event state to nonsignaled.
 									FALSE,	// bInitialState: The initial state of the event object is nonsignaled.
 									NULL	// lpName: The name of the event object.
 									);
 
-	if(m_ServiceInstance->m_ServiceStopEvent == NULL)
+	if(getInstance()->m_ServiceStopEvent == NULL)
 	{
 		// Error creating event
 		// Tell the service controller we are stopped, then exit.
-		m_ServiceInstance->m_ServiceStatus.dwControlsAccepted = 0;
-		m_ServiceInstance->m_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-		m_ServiceInstance->m_ServiceStatus.dwWin32ExitCode = GetLastError();
-		m_ServiceInstance->m_ServiceStatus.dwCheckPoint = 1;
+		getInstance()->m_ServiceStatus.dwControlsAccepted = 0;
+		getInstance()->m_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+		getInstance()->m_ServiceStatus.dwWin32ExitCode = GetLastError();
+		getInstance()->m_ServiceStatus.dwCheckPoint = 1;
 
-		if(SetServiceStatus(m_ServiceInstance->m_ServiceStatusHandle, &(m_ServiceInstance->m_ServiceStatus)) == FALSE)
+		if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
 		{
 			OutputDebugString(_T("Discreet Headphones Service: ServiceMain: SetService has returned an error"));
 		}	
@@ -95,12 +95,12 @@ VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	}
 
 	// Tell the service we are started.
-	m_ServiceInstance->m_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
-	m_ServiceInstance->m_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
-	m_ServiceInstance->m_ServiceStatus.dwWin32ExitCode = 0;
-	m_ServiceInstance->m_ServiceStatus.dwCheckPoint = 0;	
+	getInstance()->m_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+	getInstance()->m_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
+	getInstance()->m_ServiceStatus.dwWin32ExitCode = 0;
+	getInstance()->m_ServiceStatus.dwCheckPoint = 0;	
 
-	if(SetServiceStatus(m_ServiceInstance->m_ServiceStatusHandle, &(m_ServiceInstance->m_ServiceStatus)) == FALSE)
+	if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
 	{
 		OutputDebugString(_T("Discreet Headphones Service: ServiceMain: SetService has returned an error"));
 	}	
@@ -108,7 +108,7 @@ VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	// Start a thread that will perform the main task of the service.
 	HANDLE hThread = CreateThread(NULL,
 								  0,
-								  m_ServiceInstance->ServiceWorkThread,
+								  [](LPVOID lpParam) { return getInstance()->ServiceWorkThread(lpParam); },
 								  NULL,
 								  0,
 								  NULL);
@@ -119,15 +119,15 @@ VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	 * Perform any cleanup tasks
 	 */
 
-	CloseHandle(m_ServiceInstance->m_ServiceStopEvent);
+	CloseHandle(getInstance()->m_ServiceStopEvent);
 
 	// Tell the service controller we are stopped
-	m_ServiceInstance->m_ServiceStatus.dwControlsAccepted = 0;
-	m_ServiceInstance->m_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-	m_ServiceInstance->m_ServiceStatus.dwWin32ExitCode = 0;
-	m_ServiceInstance->m_ServiceStatus.dwCheckPoint = 3;
+	getInstance()->m_ServiceStatus.dwControlsAccepted = 0;
+	getInstance()->m_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+	getInstance()->m_ServiceStatus.dwWin32ExitCode = 0;
+	getInstance()->m_ServiceStatus.dwCheckPoint = 3;
 
-	if(SetServiceStatus(m_ServiceInstance->m_ServiceStatusHandle, &(m_ServiceInstance->m_ServiceStatus)) == FALSE)
+	if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
 	{
 		OutputDebugString(_T("Discreet Headphones Service: ServiceMain: SetService has returned an error"));
 	}	
