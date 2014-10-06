@@ -21,9 +21,15 @@
     <ClCompile Include="DPhonesSCM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DPhonesMMD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DPhonesSCM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DPhonesMMD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,7 +15,11 @@ int _tmain(int argc, char** argv)
 
 	// Creates an entry table for the service which has two members:
 	// serviceName and a pointer to a serviceMain function.
-	SERVICE_TABLE_ENTRY ServiceTable[] = { {SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION) DPhonesSCM::ServiceMain }, {NULL, NULL}	};
+	SERVICE_TABLE_ENTRY ServiceTable[] = 
+	{ 
+		{SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION) DPhonesSCM::ServiceMain },	// The name of the service to be run and its main function.
+		{NULL, NULL}														//
+	};
 
 	// Connects the main thread of a service process to the SCM.
 	if(StartServiceCtrlDispatcher (ServiceTable) == FALSE)

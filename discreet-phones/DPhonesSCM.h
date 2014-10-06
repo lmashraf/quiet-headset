@@ -6,7 +6,8 @@
 #include <strsafe.h>
 #include <stdio.h>
 
-#define SERVICE_NAME _T("Discreet Headphones Service")
+#define SERVICE_NAME  _T("Discreet Headphones Service")
+#define SERVICE_ERROR _T("Discreet Headphones Service: ServiceMain: SetService has returned an error")
 
 class DPhonesSCM
 {
@@ -28,6 +29,7 @@ class DPhonesSCM
 		static VOID WINAPI		ServiceMain(DWORD argc, LPTSTR *argv);
 		VOID WINAPI				ServiceCtrlHandler(DWORD ctrlCode);
 		DWORD WINAPI			ServiceWorkThread(LPVOID lpParam);
+		void					UpdateServiceStatus(DWORD sControlsAccepted, DWORD sCurrentState, DWORD sWin32ExitCode, DWORD sCheckPoint);			
 };	
 
 #endif _DPHONESSCM_H_
