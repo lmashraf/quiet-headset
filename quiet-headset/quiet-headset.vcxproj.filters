@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="QHeadsetMMD.cpp">
+      <Filter>mmdevice</Filter>
+    </ClCompile>
+    <ClCompile Include="QHeadsetSCM.cpp">
+      <Filter>scm</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="QHeadsetSCM.h">
+      <Filter>scm</Filter>
+    </ClInclude>
+    <ClInclude Include="QHeadsetMMD.h">
+      <Filter>mmdevice</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="mmdevice">
+      <UniqueIdentifier>{7e373942-b0b2-431b-a272-532e16853233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scm">
+      <UniqueIdentifier>{93edbfbf-306a-448b-830d-a6da46199629}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{a164b283-1ca5-4751-a01f-f132d3e83772}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,8 +1,8 @@
-#include "DPhonesSCM.h"
-#include "DPhonesMMD.h"
+#include "QHeadsetSCM.h"
+#include "QHeadsetMMD.h"
 
 
-DPhonesSCM::DPhonesSCM(void)
+QHeadsetSCM::QHeadsetSCM(void)
 {	
 		// Structure containing data about a service's status
 		ZeroMemory (&m_ServiceStatus, sizeof(m_ServiceStatus));
@@ -36,21 +36,21 @@ DPhonesSCM::DPhonesSCM(void)
 }
 
 //-------------------------------------------------
-DPhonesSCM::~DPhonesSCM(void)
+QHeadsetSCM::~QHeadsetSCM(void)
 {}
 
 //------------------------------------------------
-DPhonesSCM* DPhonesSCM::m_ServiceInstance = nullptr;
-DPhonesSCM*	DPhonesSCM::getInstance(void)
+QHeadsetSCM* QHeadsetSCM::m_ServiceInstance = nullptr;
+QHeadsetSCM*	QHeadsetSCM::getInstance(void)
 {
 	if(m_ServiceInstance == nullptr)
-		m_ServiceInstance = new DPhonesSCM();
+		m_ServiceInstance = new QHeadsetSCM();
 
 	return m_ServiceInstance;
 }
 //------------------------------------------------
 // This is used to update the service status properties in a more readable manner.
-void DPhonesSCM::UpdateServiceStatus(DWORD pControlsAccepted, DWORD pCurrentState, DWORD pWin32ExitCode, DWORD pCheckPoint)
+void QHeadsetSCM::UpdateServiceStatus(DWORD pControlsAccepted, DWORD pCurrentState, DWORD pWin32ExitCode, DWORD pCheckPoint)
 {
 	m_ServiceStatus.dwControlsAccepted = pControlsAccepted;
 	m_ServiceStatus.dwCurrentState = pCurrentState;
@@ -66,7 +66,7 @@ void DPhonesSCM::UpdateServiceStatus(DWORD pControlsAccepted, DWORD pCurrentStat
  * It also serves to set the service status and perform startup tasks
  * such as creating mutex, threads, IPCs and such.
  */
-VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
+VOID WINAPI	QHeadsetSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 {
 	DWORD Status = E_FAIL;
 
@@ -152,7 +152,7 @@ VOID WINAPI	DPhonesSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	return;
 }
 //------------------------------------------------
-VOID WINAPI	DPhonesSCM::ServiceCtrlHandler(DWORD ctrlCode)
+VOID WINAPI	QHeadsetSCM::ServiceCtrlHandler(DWORD ctrlCode)
 {
 	switch(ctrlCode)
 	{
@@ -189,7 +189,7 @@ VOID WINAPI	DPhonesSCM::ServiceCtrlHandler(DWORD ctrlCode)
 }
 
 //------------------------------------------------
-DWORD WINAPI DPhonesSCM::ServiceWorkThread(LPVOID lpParam)
+DWORD WINAPI QHeadsetSCM::ServiceWorkThread(LPVOID lpParam)
 {
 	while(WaitForSingleObject(m_ServiceStopEvent, 0) != WAIT_OBJECT_0)
 	{

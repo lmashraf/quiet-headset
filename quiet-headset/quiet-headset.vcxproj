@@ -62,13 +62,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DPhonesMMD.cpp" />
-    <ClCompile Include="DPhonesSCM.cpp" />
+    <ClCompile Include="QHeadsetMMD.cpp" />
+    <ClCompile Include="QHeadsetSCM.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DPhonesMMD.h" />
-    <ClInclude Include="DPhonesSCM.h" />
+    <ClInclude Include="QHeadsetMMD.h" />
+    <ClInclude Include="QHeadsetSCM.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

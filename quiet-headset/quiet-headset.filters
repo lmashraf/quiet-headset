@@ -18,18 +18,18 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DPhonesSCM.cpp">
+    <ClCompile Include="QHeadsetSCM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DPhonesMMD.cpp">
+    <ClCompile Include="QHeadsetMMD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DPhonesSCM.h">
+    <ClInclude Include="QHeadsetSCM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DPhonesMMD.h">
+    <ClInclude Include="QHeadsetMMD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

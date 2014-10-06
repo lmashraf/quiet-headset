@@ -1,5 +1,5 @@
-#ifndef _DPHONESSCM_H_
-#define _DPHONESSCM_H_
+#ifndef _QHeadsetSCM_H_
+#define _QHeadsetSCM_H_
 
 #include <windows.h>
 #include <tchar.h>
@@ -9,22 +9,22 @@
 #define SERVICE_NAME  _T("Discreet Headphones Service")
 #define SERVICE_ERROR _T("Discreet Headphones Service: ServiceMain: SetService has returned an error")
 
-class DPhonesSCM
+class QHeadsetSCM
 {
 	private:
-		static DPhonesSCM*		m_ServiceInstance;
+		static QHeadsetSCM*		m_ServiceInstance;
 
 		SERVICE_STATUS			m_ServiceStatus;		
 		SERVICE_STATUS_HANDLE	m_ServiceStatusHandle;		
 		HANDLE					m_ServiceStopEvent;		
 
 	private:
-		DPhonesSCM(void);
+		QHeadsetSCM(void);
 
 	public:
-		~DPhonesSCM(void);
+		~QHeadsetSCM(void);
 
-		static DPhonesSCM*		getInstance(void);
+		static QHeadsetSCM*		getInstance(void);
 
 		static VOID WINAPI		ServiceMain(DWORD argc, LPTSTR *argv);
 		VOID WINAPI				ServiceCtrlHandler(DWORD ctrlCode);
@@ -32,4 +32,4 @@ class DPhonesSCM
 		void					UpdateServiceStatus(DWORD sControlsAccepted, DWORD sCurrentState, DWORD sWin32ExitCode, DWORD sCheckPoint);			
 };	
 
-#endif _DPHONESSCM_H_
+#endif _QHeadsetSCM_H_
