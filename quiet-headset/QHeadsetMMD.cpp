@@ -5,35 +5,81 @@
 QHeadsetMMD::QHeadsetMMD(IAudioEndpointVolume* pVolumeControl, IMMDeviceEnumerator* pDeviceEnumerator)
 {
 	//debug_mode
-	m_DebugMode			= true;
-	
-	if(m_DebugMode)
-		m_DebugLog.open("qHeadset_Debug.txt");
+	m_DebugLog.open("qHeadset_Debug.txt");
 
 	//mmdevapi
 	m_VolumeControl		= pVolumeControl;
 	m_DeviceEnumerator	= pDeviceEnumerator;
 	m_CounterRef		= 1;
 }
+
 //-------------------------------------------------
 QHeadsetMMD::~QHeadsetMMD(void)
 {
-	// ATL::CComPtr smart pointers are self-released
-
-	if(m_DebugMode)
-		m_DebugLog.close();
+	// we are using ATL::CComPtr smart pointers, no need to safe-release anything.
+	m_DebugLog.close();
 }
+
 //-------------------------------------------------
 void QHeadsetMMD::LogMessage(std::string sCallingMethod, std::string sMessage)
 {
-	if(m_DebugMode)
-	{
-		#ifdef _WIN32
-			MessageBox(NULL, sMessage.c_str(), "Quiet Headset: ERROR OCCURED", MB_OK | MB_ICONERROR );
-		#endif
+	#ifdef _WIN32
+	MessageBox(NULL, sMessage.c_str(), "Quiet Headset: ERROR OCCURED", MB_OK | MB_ICONERROR );
+	#endif
 
-		m_DebugLog << sCallingMethod.c_str() << " : " << sMessage.c_str();
+	m_DebugLog << sCallingMethod.c_str() << " : " << sMessage.c_str();
+}
+
+//--------------------------------------------------
+BOOL QHeadsetMMD::SearchHeadset(LPCWSTR pwstrId)
+{
+	std::string sDeviceName, err;
+	HRESULT hr  = S_OK;
+
+	ATL::CComPtr<IPropertyStore> Properties;
+	PROPVARIANT varProperties;
+
+	PropVariantInit(&varProperties);
+
+	// I picked the jump-on-fail for error handling 
+	// see other ways to do it here: http://msdn.microsoft.com/en-us/library/windows/desktop/ff485842(v=vs.85).aspx
+	hr = m_DeviceEnumerator->GetDevice(pwstrId, &m_Device);
+	if(FAILED(hr))
+	{
+		err = "Failed to enumerate audio endpoint devices.";
+		goto failure_exit;
 	}
+
+	hr = m_Device->OpenPropertyStore(STGM_READ, &Properties);
+	if(FAILED(hr))
+	{
+		err = "Failed to read the audio endpoint device's properties.";
+		goto failure_exit;
+	}
+
+	hr = Properties->GetValue(PKEY_Device_FriendlyName, &varProperties);
+	if(FAILED(hr))
+	{
+		err = "Failed to retrieve the audio endpoint device's name.";
+		goto failure_exit;
+	}
+
+	sDeviceName = CW2A(varProperties.pwszVal);	
+	if (sDeviceName.find("Jack") != std::string::npos) 
+	{
+		PropVariantClear(&varProperties);
+		return TRUE;
+	}
+	else
+	{
+		err = "The plugged/unplugged device is not a headset.";
+		goto failure_exit;
+	}
+
+failure_exit:
+		LogMessage("SearchHeadset", err);
+		PropVariantClear(&varProperties);
+		return FALSE;
 }
 
 /**********************************
@@ -122,7 +168,25 @@ HRESULT __stdcall QHeadsetMMD::OnDeviceStateChanged(LPCWSTR pwstrDeviceId, DWORD
 // notifies that the value of a property belonging to an audio endpoint device has changed.
 HRESULT __stdcall QHeadsetMMD::OnPropertyValueChanged(LPCWSTR pwstrDeviceId, const PROPERTYKEY key)
 {
-	return S_OK;
+	BOOL	bMute;
+
+	// Checks whether the speakers are muted.
+	HRESULT hr = m_VolumeControl->GetMute(&bMute);
+
+	if(SUCCEEDED(hr) && !bMute)
+	{
+		// In case the speakers are not muted, mute them!
+		hr = m_VolumeControl->SetMute(TRUE, NULL);
+		LogMessage("OnPropertyValueChanged", "Mute toggled!");
+	}
+	else
+	{
+		// Failed to check whether the speakers are muted!
+		hr = S_OK;
+		LogMessage("OnPropertyValueChanged", "Mute failed!");
+	}
+
+	return hr;
 }
 
 //-------------------------------------------------

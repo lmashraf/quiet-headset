@@ -26,6 +26,7 @@ class QHeadsetSCM
 
 		static QHeadsetSCM*		getInstance(void);
 
+	public:
 		static VOID WINAPI		ServiceMain(DWORD argc, LPTSTR *argv);
 		VOID WINAPI				ServiceCtrlHandler(DWORD ctrlCode);
 		DWORD WINAPI			ServiceWorkThread(LPVOID lpParam);

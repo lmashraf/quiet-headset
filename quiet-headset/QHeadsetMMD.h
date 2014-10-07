@@ -13,34 +13,38 @@
 #include "atlbase.h"
 #include "mmdeviceapi.h"
 #include "endpointvolume.h"
+#include "functiondiscoverykeys_devpkey.h"
 
-#include <iostream>
+// for debug and logging
 #include <fstream>
 
 // Smartpointers from the Active Template Library to manage the Component Object Model interfaces (CComPtr) :
-typedef ATL::CComPtr<IAudioEndpointVolume> IAUDIO_VOLUME;
-typedef ATL::CComPtr<IMMDeviceEnumerator>  IAUDIO_DEVICE;
-
+typedef ATL::CComPtr<IMMDevice>			   IMM_DEVICE;
+typedef ATL::CComPtr<IMMDeviceEnumerator>  IMM_DEVICE_ENUM;
+typedef ATL::CComPtr<IAudioEndpointVolume> IMM_AUDIO_VOLUME;
 
 // IMMNotificationClient is an interface who provides notifications when an audio endpoint device is plugged/unplugged.
 class QHeadsetMMD : public IMMNotificationClient 
 {
 	private:
 		// qheadset
-		bool			m_DebugMode;
-		std::ofstream	m_DebugLog;
+		std::ofstream		m_DebugLog;
 
 		// mmdevapi
-		LONG			m_CounterRef;			// reference count for interface on an object. necessary for AddRef/QueryInterface/Release from IUnknown
+		LONG				m_CounterRef;			// reference count for interface on an object. necessary for AddRef/QueryInterface/Release from IUnknown
 
-		IAUDIO_VOLUME	m_VolumeControl;		// an interface to volume controls of the audio stream to/from and audio endpoint device.
-		IAUDIO_DEVICE	m_DeviceEnumerator;		// an interface that provides methods for enumerating audio endpoint device resources
+		IMM_DEVICE_ENUM		m_DeviceEnumerator;		// an interface that provides methods for enumerating audio endpoint device resources
+		IMM_AUDIO_VOLUME	m_VolumeControl;		// an interface to volume controls of the audio stream to/from and audio endpoint device.
+		IMM_DEVICE			m_Device;				// an interface to encapsulate generic multimedia features, in this case audio endpoint devices.
+
 
 	public:
 		QHeadsetMMD(IAudioEndpointVolume* pVolumeControl, IMMDeviceEnumerator* pDeviceEnumerator);
 		~QHeadsetMMD(void);
 
+	public:
 		void LogMessage(std::string sCallingMethod, std::string sMessage);
+		BOOL SearchHeadset(LPCWSTR ptstrId);
 
 	public:
 		// IUnknown methods: get pointers to interfaces on given object and manages them.
@@ -48,7 +52,6 @@ class QHeadsetMMD : public IMMNotificationClient
 		ULONG	__stdcall Release(void);										
 		HRESULT	__stdcall QueryInterface(REFIID riid, void **ppvObject);	
 
-	public:
 		// IMMNotificationClient methods: callback methods for audio endpoints device-events notifications.
 		HRESULT __stdcall OnPropertyValueChanged(LPCWSTR pwstrDeviceId, const PROPERTYKEY key);
 		HRESULT __stdcall OnDefaultDeviceChanged(EDataFlow flow, ERole role, LPCWSTR pwstrDeviceId);
