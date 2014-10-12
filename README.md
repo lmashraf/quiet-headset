@@ -8,8 +8,8 @@ How to use:
 ===========
 In order to install as a windows service, run the following command:
 
-sc create "Quiet Headset Service" binPath= "path_to_exe_file"
+```sc create "Quiet Headset Service" binPath= "path_to_exe_file"```
 
 To remove the service:
 
-sc delete "Quiet Headset Service"
+```sc delete "Quiet Headset Service"```
