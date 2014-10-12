@@ -135,35 +135,6 @@ HRESULT __stdcall QHeadsetMMD::QueryInterface(REFIID riid, void **ppvObject)
 /**********************************
  * IMMNotificationClient methods
  **********************************/
-//-------------------------------------------------
-// notifies that the state of an audio endpoint device has changed.
-HRESULT __stdcall QHeadsetMMD::OnDeviceStateChanged(LPCWSTR pwstrDeviceId, DWORD dwNewState)
-{
-	char* pszState;
-
-	switch (dwNewState)
-	{
-		case DEVICE_STATE_ACTIVE:
-			pszState = "ACTIVE";
-			break;
-
-		case DEVICE_STATE_DISABLED:
-			pszState = "DISABLED";
-			break;
-
-		case DEVICE_STATE_NOTPRESENT:
-			pszState = "NOTPRESENT";
-			break;
-
-		case DEVICE_STATE_UNPLUGGED:
-			pszState = "UNPLUGGED";
-			break;
-	}
-
-	LogMessage("OnDeviceStateChanged", pszState);
-
-	return S_OK;
-}
 
 // notifies that the value of a property belonging to an audio endpoint device has changed.
 HRESULT __stdcall QHeadsetMMD::OnPropertyValueChanged(LPCWSTR pwstrDeviceId, const PROPERTYKEY key)
@@ -177,7 +148,11 @@ HRESULT __stdcall QHeadsetMMD::OnPropertyValueChanged(LPCWSTR pwstrDeviceId, con
 	{
 		// In case the speakers are not muted, mute them!
 		hr = m_VolumeControl->SetMute(TRUE, NULL);
-		LogMessage("OnPropertyValueChanged", "Mute toggled!");
+	}
+	else if(SUCCEEDED(hr) && bMute)
+	{
+		// In case the speaker is already muted, we unmute it since the headset has probably been plugged back in!
+		hr = m_VolumeControl->SetMute(FALSE, NULL);
 	}
 	else
 	{
@@ -206,6 +181,13 @@ HRESULT __stdcall QHeadsetMMD::OnDeviceAdded(LPCWSTR pwstrDeviceId)
 //-------------------------------------------------
 // notifies when an audio endpoint device has been removed.
 HRESULT __stdcall QHeadsetMMD::OnDeviceRemoved(LPCWSTR pwstrDeviceId)
+{
+	return S_OK;
+}
+
+//-------------------------------------------------
+// notifies that the state of an audio endpoint device has changed.
+HRESULT __stdcall QHeadsetMMD::OnDeviceStateChanged(LPCWSTR pwstrDeviceId, DWORD dwNewState)
 {
 	return S_OK;
 }

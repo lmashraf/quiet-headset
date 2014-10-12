@@ -1,9 +1,10 @@
 #include "QHeadsetSCM.h"
-#include "QHeadsetMMD.h"
 
-
+QHeadsetMMD* QHeadsetSCM::m_MultimediaInstance	= nullptr;
+QHeadsetSCM* QHeadsetSCM::m_ServiceInstance		= nullptr;
+//----------------------------------------------------
 QHeadsetSCM::QHeadsetSCM(void)
-{	
+{
 		// Structure containing data about a service's status
 		ZeroMemory (&m_ServiceStatus, sizeof(m_ServiceStatus));
 			
@@ -37,10 +38,11 @@ QHeadsetSCM::QHeadsetSCM(void)
 
 //-------------------------------------------------
 QHeadsetSCM::~QHeadsetSCM(void)
-{}
+{
+	delete m_MultimediaInstance;
+}
 
 //------------------------------------------------
-QHeadsetSCM* QHeadsetSCM::m_ServiceInstance = nullptr;
 QHeadsetSCM*	QHeadsetSCM::getInstance(void)
 {
 	if(m_ServiceInstance == nullptr)
@@ -89,13 +91,11 @@ VOID WINAPI	QHeadsetSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 		OutputDebugString(SERVICE_ERROR);
 	}
 
+
 	/*
-	 *
-	 *
 	 * TBD: Performs tasks necessary to start the service
-	 *
-	 *
 	 */
+
 
 	// Create a service stop event to wait on later
 	getInstance()->m_ServiceStopEvent = CreateEvent(NULL,	// lpEventAttributes: The handle cannot be inherited by child processes.
@@ -111,7 +111,9 @@ VOID WINAPI	QHeadsetSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 		getInstance()->UpdateServiceStatus(0, SERVICE_STOPPED, GetLastError(), 1);
 
 		if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
+		{
 			OutputDebugString(SERVICE_ERROR);
+		}
 
 		return;
 	}
@@ -120,7 +122,9 @@ VOID WINAPI	QHeadsetSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	getInstance()->UpdateServiceStatus(SERVICE_ACCEPT_STOP, SERVICE_RUNNING, 0, 0);
 
 	if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
+	{
 		OutputDebugString(SERVICE_ERROR);
+	}
 
 	// Start a thread that will perform the main task of the service.
 	HANDLE hThread = CreateThread(NULL,	
@@ -133,13 +137,11 @@ VOID WINAPI	QHeadsetSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	// Wait until the thread enters the signaled state. The time elapse is set to infinity.
 	WaitForSingleObject(hThread, INFINITE);
 
+
 	/**
-	 *
-	 *
 	 * TBD: Perform any cleanup tasks
-	 *
-	 *
 	 */
+
 
 	CloseHandle(getInstance()->m_ServiceStopEvent);
 
@@ -147,7 +149,9 @@ VOID WINAPI	QHeadsetSCM::ServiceMain(DWORD argc, LPTSTR *argv)
 	getInstance()->UpdateServiceStatus(0, SERVICE_STOPPED, 0, 3);
 
 	if(SetServiceStatus(getInstance()->m_ServiceStatusHandle, &(getInstance()->m_ServiceStatus)) == FALSE)
+	{
 		OutputDebugString(SERVICE_ERROR);
+	}
 
 	return;
 }
@@ -160,13 +164,13 @@ VOID WINAPI	QHeadsetSCM::ServiceCtrlHandler(DWORD ctrlCode)
 			{
 				if(m_ServiceStatus.dwCurrentState != SERVICE_RUNNING)
 					break;
+
+
 				/*
-				 *
-				 *
 				 * TBD: Perform tasks necessary to stop the service
-				 *
-				 *
 			     */
+
+
 				getInstance()->UpdateServiceStatus(0, SERVICE_STOP_PENDING, 0, 4);
 	
 				if(SetServiceStatus(m_ServiceStatusHandle, &m_ServiceStatus) == FALSE)
@@ -191,16 +195,54 @@ VOID WINAPI	QHeadsetSCM::ServiceCtrlHandler(DWORD ctrlCode)
 //------------------------------------------------
 DWORD WINAPI QHeadsetSCM::ServiceWorkThread(LPVOID lpParam)
 {
+	this->ServiceMMDNotification();
+
 	while(WaitForSingleObject(m_ServiceStopEvent, 0) != WAIT_OBJECT_0)
 	{
+
 		/*
-		 *
-		 *
 		 * TBD: Perform main service function here: do some work.
-		 *
-		 *
 		 */
+
 	}
 
 	return ERROR_SUCCESS;
+}
+
+
+//-------------------------------------------------
+HRESULT QHeadsetSCM::ServiceMMDNotification(void)
+{
+	HRESULT hr = S_FALSE;
+
+	cptrIMMDevice		d_Speaker;
+	cptrIMMDeviceEnum	d_Enumerator;
+	cptrIAudioVolume	d_VolumeControl;
+
+	// Initialize the COM library on a thread.
+	CoInitialize(NULL);
+
+	// Create an instance of our Multimedia Device enumerator COM object.
+	hr = d_Enumerator.CoCreateInstance(__uuidof(MMDeviceEnumerator));
+	if(SUCCEEDED(hr))
+	{
+		// We look first for the default audio endpoint (speakers) which will have their volume lowered/muted
+		d_Enumerator->GetDefaultAudioEndpoint(eRender,		// dataflow for a rendering device.
+											 eMultimedia,	// role of the audio endpoint device.
+											 &d_Speaker);
+
+		hr = d_Speaker->Activate(__uuidof(IAudioEndpointVolume),	// We create a COM object with the IAudioEndpointVolume interface
+								 CLSCTX_ALL,					// Execution context
+								 NULL,							// default: NULL for activating an IAudioEndpointVolume object
+								 (void**) &d_VolumeControl);		// COM interface.
+
+		if(SUCCEEDED(hr))
+		{
+			m_MultimediaInstance = new QHeadsetMMD(d_VolumeControl, d_Enumerator);
+
+			hr = d_Enumerator->RegisterEndpointNotificationCallback( static_cast<IMMNotificationClient*> (m_MultimediaInstance) );
+		}
+	}
+
+	return hr;
 }

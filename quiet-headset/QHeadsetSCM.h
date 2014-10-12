@@ -6,13 +6,16 @@
 #include <strsafe.h>
 #include <stdio.h>
 
-#define SERVICE_NAME  _T("Discreet Headphones Service")
-#define SERVICE_ERROR _T("Discreet Headphones Service: ServiceMain: SetService has returned an error")
+#include "QHeadsetMMD.h"
+
+#define SERVICE_NAME  _T("QuietHeadset Service")
+#define SERVICE_ERROR _T("QuietHeadset Service: ServiceMain: SetService has returned an error")
 
 class QHeadsetSCM
 {
 	private:
 		static QHeadsetSCM*		m_ServiceInstance;
+		static QHeadsetMMD*		m_MultimediaInstance;
 
 		SERVICE_STATUS			m_ServiceStatus;		
 		SERVICE_STATUS_HANDLE	m_ServiceStatusHandle;		
@@ -25,6 +28,7 @@ class QHeadsetSCM
 		~QHeadsetSCM(void);
 
 		static QHeadsetSCM*		getInstance(void);
+		HRESULT					ServiceMMDNotification(void);
 
 	public:
 		static VOID WINAPI		ServiceMain(DWORD argc, LPTSTR *argv);

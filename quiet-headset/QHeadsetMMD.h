@@ -19,9 +19,9 @@
 #include <fstream>
 
 // Smartpointers from the Active Template Library to manage the Component Object Model interfaces (CComPtr) :
-typedef ATL::CComPtr<IMMDevice>			   IMM_DEVICE;
-typedef ATL::CComPtr<IMMDeviceEnumerator>  IMM_DEVICE_ENUM;
-typedef ATL::CComPtr<IAudioEndpointVolume> IMM_AUDIO_VOLUME;
+typedef ATL::CComPtr<IMMDevice>			   cptrIMMDevice;
+typedef ATL::CComPtr<IMMDeviceEnumerator>  cptrIMMDeviceEnum;
+typedef ATL::CComPtr<IAudioEndpointVolume> cptrIAudioVolume;
 
 // IMMNotificationClient is an interface who provides notifications when an audio endpoint device is plugged/unplugged.
 class QHeadsetMMD : public IMMNotificationClient 
@@ -33,10 +33,9 @@ class QHeadsetMMD : public IMMNotificationClient
 		// mmdevapi
 		LONG				m_CounterRef;			// reference count for interface on an object. necessary for AddRef/QueryInterface/Release from IUnknown
 
-		IMM_DEVICE_ENUM		m_DeviceEnumerator;		// an interface that provides methods for enumerating audio endpoint device resources
-		IMM_AUDIO_VOLUME	m_VolumeControl;		// an interface to volume controls of the audio stream to/from and audio endpoint device.
-		IMM_DEVICE			m_Device;				// an interface to encapsulate generic multimedia features, in this case audio endpoint devices.
-
+		cptrIMMDevice		m_Device;				// an interface to encapsulate generic multimedia features, in this case audio endpoint devices.
+		cptrIMMDeviceEnum	m_DeviceEnumerator;		// an interface that provides methods for enumerating audio endpoint device resources
+		cptrIAudioVolume	m_VolumeControl;		// an interface to volume controls of the audio stream to/from and audio endpoint device.
 
 	public:
 		QHeadsetMMD(IAudioEndpointVolume* pVolumeControl, IMMDeviceEnumerator* pDeviceEnumerator);
